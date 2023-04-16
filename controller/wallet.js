@@ -1,19 +1,42 @@
 const express = require('express');
 const app = express.Router();
 const properties = require('../config/properties')
-const infuraService = require('../service/infura');
+const customError = require('../exception/customError');
+const resCode = require('../exception/resCode');
+
+const walletService = require('../service/wallet')
 
 
-app.get('/hello', async (req, res) => {
-  const name = req.query.name || 'World';
-  const test = await infuraService.testAPI("테스트다");
-  console.log(process.env.NODE_ENV);
-  const message = `Hello, ${properties.ADMIN_SERVER}! /11 ${test} /22`;
+app.get('/get/balance', async (req, res) => {
 
-  // JSON 형식으로 응답
-  res.json({
-    message: message
-  });
+  try {
+    // '0x23d02A1c3375Fb67F868147B7BB666e168F7C2ee'
+    const addr = req.query.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
+    console.log(addr)
+    const balance = await walletService.getBalance(addr)
+    const data = {'balance' : balance};
+
+    // JSON 형식으로 응답
+    res.json({
+      code: 200,
+      data: data
+    });
+  } catch (e) {
+    if (e instanceof customError) {
+      console.log(e.httpStatusCode, e.code, e.message)
+      res.status(e.httpStatusCode).json({
+        code : e.code,
+        msg : e.message
+      })
+    } else {
+      res.status(500).json({
+        code : e.code,
+        msg : e.msg
+      })
+    }
+  }
+
+
 });
 
 module.exports = app;
