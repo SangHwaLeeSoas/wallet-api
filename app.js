@@ -4,16 +4,6 @@ const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const log4js = require('log4js');
-
-log4js.configure({
-  appenders: {
-    fileAppender: { type: 'file', filename: 'app.log' }
-  },
-  categories: {
-    default: { appenders: ['fileAppender'], level: 'info' }
-  }
-});
 
 const commonController = require('./controller/common');
 const walletController = require('./controller/wallet');
