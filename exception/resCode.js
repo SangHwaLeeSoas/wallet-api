@@ -6,7 +6,7 @@ const resCode = {
     SERVER_ERROR: { httpCode: 500, code: 'SERVER_ERROR', message: '서버 에러' },
     RPC_ERROR: { httpCode: 500, code: 'RPC_ERROR', message: 'RPC 통신 에러' },
 
-    create: (resCode, message) => ({ httpCode: resCode.httpCode, code: resCode.code, message }),
+    create: (resCode, message) => ({ httpCode: resCode.httpCode, code: resCode.code, message : message || resCode.message }),
 };
 
 

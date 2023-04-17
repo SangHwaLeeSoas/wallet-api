@@ -29,9 +29,10 @@ app.get('/get/balance', async (req, res) => {
         msg : e.message
       })
     } else {
-      res.status(500).json({
-        code : e.code,
-        msg : e.msg
+      const customRes = resCode.create(resCode.SERVER_ERROR)
+      res.status(customRes.httpCode).json({
+        code : customRes.code,
+        msg : e.message
       })
     }
   }
