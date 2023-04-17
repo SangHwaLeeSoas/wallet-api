@@ -3,6 +3,8 @@ const app = express.Router();
 const properties = require('../config/properties')
 const customError = require('../exception/customError');
 const resCode = require('../exception/resCode');
+const log4js = require("log4js");
+const logger = log4js.getLogger();
 
 const walletService = require('../service/wallet')
 
@@ -15,7 +17,8 @@ app.get('/get/balance', async (req, res) => {
     console.log(addr)
     const balance = await walletService.getBalance(addr)
     const data = {'balance' : balance};
-
+    logger.info("#############################")
+    logger.info("안녕 지갑 API야")
     // JSON 형식으로 응답
     res.json({
       code: 200,
