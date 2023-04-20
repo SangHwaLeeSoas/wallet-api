@@ -7,6 +7,8 @@ const logger = require('../config/log4').getLogger('walletController')
 const walletService = require('../service/wallet')
 
 
+
+/* * 잔액 조회 API */
 app.get('/get/balance', async (req, res) => {
 
   try {
@@ -36,8 +38,7 @@ app.get('/get/balance', async (req, res) => {
       })
     }
   }
-
-
 });
+
 
 module.exports = app;
