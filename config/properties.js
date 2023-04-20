@@ -8,4 +8,7 @@ module.exports = {
     PROTOCOL_SEPARATE: process.env.PROTOCOL_SEPARATE,
     RPC_PROTOCOL: process.env.RPC_PROTOCOL,
     RPC_URL: process.env.RPC_URL,
+    ABI_PATH: process.env.ABI_PATH,
+    CONTRACT_ADDRESS: process.env.CONTRACT_ADDRESS,
+
 };
