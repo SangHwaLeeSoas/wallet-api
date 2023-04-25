@@ -17,7 +17,7 @@ exports.getBalance = async (addr) => {
     try {
         const rawAbi = fs.readFileSync(properties.ABI_PATH);
         const tokenAbi = JSON.parse(rawAbi.toString());
-        const myToken = new web3.eth.Contract(tokenAbi, '0xd6e954Ec1c6749C442C65F40C6107d455A3721Ee');
+        const myToken = new web3.eth.Contract(tokenAbi, '0x60deb954bc80eb959736a0d0bfbaee2e2e767de7');
         const balance = await myToken.methods.balanceOf(addr).call()
         return balance;
     } catch (e) {
