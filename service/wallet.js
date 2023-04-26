@@ -57,26 +57,30 @@ exports.makeWallet = async () => {
                                 })
         const gasLimit = '23000';
         const txParams = {
-            // from: properties.OWNER_WALLET, // TODO : 추후 Hotwallet 변경 계정 주소
+            from: properties.OWNER_WALLET, // TODO : 추후 Hotwallet 변경 계정 주소
             to: properties.CONTRACT_ADDRESS,
             nonce: web3.utils.toHex(nonce),
             // gasPrice: web3.utils.toHex(gasPrice),
             gasPrice: web3.utils.toHex(estimatedGas),
             gasLimit: web3.utils.toHex(estimatedGas * 2),
-            data: functionAbi
+            data: functionAbi,
+            chainId: 5
         };
 
         console.log('#####################')
         console.log(gasLimit)
         console.log(txParams)
 
-        // const signedTx = await web3.eth.accounts.signTransaction(txParams, wallet.privateKey);
-        const tx = new EthereumTx(txParams, { 'chain': 'goerli' })
-        tx.sign(wallet.privateKey)
-        const serializedTx = tx.serialize()
+        const signedTx = await web3.eth.accounts.signTransaction(txParams, wallet.privateKey);
+        // const tx = new EthereumTx(txParams, { 'chain': 'goerli' })
+        // tx.sign(wallet.privateKey)
+        // const serializedTx = tx.serialize()
 
-        // await web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-        await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
+        console.log('####################');
+        console.log(signedTx);
+
+        await web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+        // await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
             .on('transactionHash', function(hash) {
                 console.log('Transaction Hash : ' + hash);
             }).on('receipt', function(receipt) {
