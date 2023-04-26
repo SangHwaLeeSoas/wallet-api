@@ -14,6 +14,7 @@ app.get('/get/balance', async (req, res) => {
   try {
     logger.info(`/get/balance => ${req.query.addr}`)
     const addr = req.query.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
+    const coin = req.query.coin || "";
     const data = await walletService.getBalance(addr)
 
     res.json({
@@ -60,7 +61,7 @@ app.get('/get/all/account', async (req, res) => {
 
 
 /* * 공통 Error Response */
-function makeErrorResponse(e, res) {
+function makeErrorResponse (e, res) {
   if (e instanceof customError) {
     logger.info(e)
     res.status(e.httpStatusCode).json({

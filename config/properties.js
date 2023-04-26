@@ -10,5 +10,7 @@ module.exports = {
     RPC_URL: process.env.RPC_URL,
     ABI_PATH: process.env.ABI_PATH,
     CONTRACT_ADDRESS: process.env.CONTRACT_ADDRESS,
+    OWNER_WALLET: process.env.OWNER_WALLET,
+    HOT_WALLET: process.env.HOT_WALLET,
 
 };
