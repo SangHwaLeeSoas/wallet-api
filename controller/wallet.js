@@ -14,8 +14,7 @@ app.get('/get/balance', async (req, res) => {
   try {
     logger.info(`/get/balance => ${req.query.addr}`)
     const addr = req.query.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
-    const balance = await walletService.getBalance(addr)
-    const data = {'balance' : balance};
+    const data = await walletService.getBalance(addr)
 
     res.json({
       code: 200,
@@ -31,10 +30,8 @@ app.get('/get/balance', async (req, res) => {
 app.get('/make/account', async (req, res) => {
 
   try {
-    logger.info(`/make/account => ${req.query.privateKey}`)
-    const privateKey = req.query.privateKey || (() => { throw new customError(resCode.BAD_REQUEST, 'empty privateKey') })();
-    const wallet = await walletService.makeWallet(privateKey)
-    const data = {'wallet' : wallet};
+    logger.info(`/make/account`)
+    const data = await walletService.makeWallet()
 
     res.json({
       code: 200,
@@ -50,8 +47,7 @@ app.get('/make/account', async (req, res) => {
 app.get('/get/all/account', async (req, res) => {
 
   try {
-    const accountList = await walletService.getAccountAll()
-    const data = {'accountList' : accountList};
+    const data = await walletService.getAccountAll()
 
     res.json({
       code: 200,
