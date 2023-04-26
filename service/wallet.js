@@ -61,14 +61,14 @@ exports.makeWallet = async () => {
             to: properties.CONTRACT_ADDRESS,
             nonce: web3.utils.toHex(nonce),
             // gasPrice: web3.utils.toHex(gasPrice),
-            gasPrice: web3.utils.toHex(estimatedGas),
-            gasLimit: web3.utils.toHex(estimatedGas * 2),
+            gasPrice: web3.utils.toHex('89277'),
+            gasLimit: web3.utils.toHex('22000'),
             data: functionAbi,
-            chainId: 5
+            chainId: 5,
         };
 
         console.log('#####################')
-        console.log(gasLimit)
+        console.log(estimatedGas)
         console.log(txParams)
 
         const signedTx = await web3.eth.accounts.signTransaction(txParams, wallet.privateKey);
@@ -99,6 +99,8 @@ exports.makeWallet = async () => {
             case "OUT_OF_GAS" :
                 throw new customError(resCode.OUT_OF_GAS, e.message)
             default :
+                console.log('######################');
+                console.log(e);
                 throw new customError(resCode.RPC_ERROR, e.message)
         }
     }
