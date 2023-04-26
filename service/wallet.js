@@ -20,7 +20,7 @@ const myToken = new web3.eth.Contract(tokenAbi, properties.CONTRACT_ADDRESS);
 exports.getBalance = async (addr) => {
     try {
         const balance = await myToken.methods.balanceOf(addr).call()
-        return balance;
+        return { 'balance' : balance };
     } catch (e) {
         const code = e.code;
         switch (code) {
@@ -36,11 +36,20 @@ exports.getBalance = async (addr) => {
 
 
 /* * 지갑 생성 */
-exports.makeWallet = async (privateKey) => {
+exports.makeWallet = async () => {
     try {
-        const wallet = await web3.eth.personal.newAccount(privateKey)
+        const wallet = await web3.eth.accounts.create()
         console.log(wallet)
-        return wallet;
+
+        await myToken.methods.addAccount(wallet.address, wallet.privateKey).send({
+            from: properties.CONTRACT_ADDRESS, // 계정 주소
+            gas: 1000000
+        }).then((receipt) => {
+            console.log(receipt);
+            console.log('#계정 저장 완료');
+            return Promise.resolve(wallet);
+        })
+
     } catch (e) {
         const code = e.code;
         switch (code) {
@@ -59,7 +68,7 @@ exports.getAccountAll = async () => {
     try {
         const account = await web3.eth.getAccounts()
         console.log(account)
-        return account;
+        return { 'accountList' : account };
     } catch (e) {
         const code = e.code;
         switch (code) {
