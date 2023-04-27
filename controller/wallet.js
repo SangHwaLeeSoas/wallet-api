@@ -8,14 +8,15 @@ const walletService = require('../service/wallet')
 
 
 
-/* * 잔액 조회 API */
+/* * 잔액 조회 API
+*  @Param : coin (ETH, TOKEN) addr (주소) */
 app.get('/get/balance', async (req, res) => {
 
   try {
     logger.info(`/get/balance => ${req.query.addr}`)
     const addr = req.query.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
-    const coin = req.query.coin || "";
-    const data = await walletService.getBalance(addr)
+    const coin = req.query.coin || "ETH";
+    const data = await walletService.getBalance(coin, addr)
 
     res.json({
       code: 200,
@@ -45,19 +46,19 @@ app.get('/make/account', async (req, res) => {
 
 
 /* * 지갑 목록 전체 조회 API */
-app.get('/get/all/account', async (req, res) => {
-
-  try {
-    const data = await walletService.getAccountAll()
-
-    res.json({
-      code: 200,
-      data: data
-    });
-  } catch (e) {
-    makeErrorResponse(e, res)
-  }
-});
+// app.get('/get/all/account', async (req, res) => {
+//
+//   try {
+//     const data = await walletService.getAccountAll()
+//
+//     res.json({
+//       code: 200,
+//       data: data
+//     });
+//   } catch (e) {
+//     makeErrorResponse(e, res)
+//   }
+// });
 
 
 /* * 공통 Error Response */
