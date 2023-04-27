@@ -4,6 +4,7 @@ const fs = require('fs');
 const properties = require('../config/properties')
 const customError = require("../exception/customError");
 const resCode = require("../exception/resCode");
+const logger = require('../config/log4').getLogger('walletController')
 
 
 /* * web3.js provider 세팅 */
@@ -48,52 +49,58 @@ exports.makeWallet = async () => {
     try {
         const wallet = await web3.eth.accounts.create()
         return { 'wallet' : wallet };
+    } catch (e) {
+        const code = e.code;
+        switch (code) {
+            case "INVALID_ARGUMENT":
+                throw new customError(resCode.INVALID_ADDRESS, e.message)
+            case "OUT_OF_GAS" :
+                throw new customError(resCode.OUT_OF_GAS, e.message)
+            default :
+                throw new customError(resCode.RPC_ERROR, e.message)
+        }
+    }
+}
 
-        /* Infura에서 eth_sendTransaction를 지원하지 않음 */
-        // const functionAbi = myToken.methods.addAccount(wallet.address, wallet.privateKey).encodeABI();
-        // const nonce = await web3.eth.getTransactionCount(properties.OWNER_WALLET);
-        // // const gasPrice = web3.utils.toWei('20', 'gwei');
-        // const estimatedGas = await web3.eth.estimateGas({
-        //                             from: properties.OWNER_WALLET,
-        //                             to: properties.CONTRACT_ADDRESS,
-        //                             nonce: web3.utils.toHex(nonce),
-        //                             data: functionAbi
-        //                         })
-        // const gasLimit = '23000';
-        // const txParams = {
-        //     from: properties.OWNER_WALLET, // TODO : 추후 Hotwallet 변경 계정 주소
-        //     to: properties.CONTRACT_ADDRESS,
-        //     nonce: web3.utils.toHex(nonce),
-        //     // gasPrice: web3.utils.toHex(gasPrice),
-        //     gasPrice: web3.utils.toHex('89277'),
-        //     gasLimit: web3.utils.toHex('22000'),
-        //     data: functionAbi,
-        //     chainId: 5,
-        // };
-        //
-        // console.log('#####################')
-        // console.log(estimatedGas)
-        // console.log(txParams)
-        //
-        // const signedTx = await web3.eth.accounts.signTransaction(txParams, wallet.privateKey);
-        // // const tx = new EthereumTx(txParams, { 'chain': 'goerli' })
-        // // tx.sign(wallet.privateKey)
-        // // const serializedTx = tx.serialize()
-        //
-        // console.log('####################');
-        // console.log(signedTx);
-        //
-        // await web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-        // // await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
-        //     .on('transactionHash', function(hash) {
-        //         console.log('Transaction Hash : ' + hash);
-        //     }).on('receipt', function(receipt) {
-        //     console.log('#계정 저장 완료');
-        //     console.log(receipt);
-        //     console.log(wallet)
-        //     return Promise.resolve({ 'wallet': wallet });
-        // });
+/* 토큰 전송 */
+exports.transferToken = async (fromAddress, privateKey, toAddress, coin, amount) => {
+    try {
 
+        let balance = 0;
+        let data = null;
+        let value = null;
+        switch (coin) {
+            case 'TOKEN':
+                balance = await myToken.methods.balanceOf(fromAddress).call();
+                data = myToken.methods.transfer(toAddress, amount).encodeABI()
+                break;
+            case 'ETH':
+                balance = await web3.eth.getBalance(fromAddress);
+                value = amount;
+                break;
+        }
+
+        /* 잔액 최대 제한 */
+        if (balance < amount)
+            throw new customError(resCode.OUT_OF_AMOUNT)
+
+        let gasPrice = await web3.eth.getGasPrice();
+        let gasLimit = properties.GAS_LIMIT;
+        let tx = {
+            from: fromAddress,
+            to: properties.CONTRACT_ADDRESS,
+            gasPrice: web3.utils.toHex(gasPrice),
+            gas: web3.utils.toHex(gasLimit),
+            chainId: properties.CHAIN_ID
+        };
+        if (data) tx.data = data;
+        if (value) tx.value = data;
+
+        logger.info(tx);
+        const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
+        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+        logger.info(receipt);
+        return { 'transactionHash' : receipt.transactionHash };
 
     } catch (e) {
         const code = e.code;
@@ -103,33 +110,8 @@ exports.makeWallet = async () => {
             case "OUT_OF_GAS" :
                 throw new customError(resCode.OUT_OF_GAS, e.message)
             default :
-                console.log('######################');
-                console.log(e);
                 throw new customError(resCode.RPC_ERROR, e.message)
         }
-    }
-}
-
-/* 토큰 전송 */
-async function transferToken(tokenAddress, fromAddress, privateKey, toAddress, amount) {
-    try {
-        const tokenDecimals = await myToken.methods.decimals().call();
-        const value = amount * 10 ** tokenDecimals;
-        const gasPrice = await web3.eth.getGasPrice();
-        const gasLimit = 300000; // or whatever gas limit you prefer
-        const tx = {
-            from: fromAddress,
-            to: tokenAddress,
-            gasPrice: gasPrice,
-            gas: gasLimit,
-            data: myToken.methods.transfer(toAddress, value).encodeABI(),
-            chainId: 5
-        };
-        const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
-        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-        return receipt.transactionHash;
-    } catch (e) {
-        console.log(e);
     }
 }
 

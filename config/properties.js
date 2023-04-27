@@ -10,7 +10,12 @@ module.exports = {
     RPC_URL: process.env.RPC_URL,
     ABI_PATH: process.env.ABI_PATH,
     CONTRACT_ADDRESS: process.env.CONTRACT_ADDRESS,
-    OWNER_WALLET: process.env.OWNER_WALLET,
-    HOT_WALLET: process.env.HOT_WALLET,
+    OWNER_WALLET_ADDRESS: process.env.OWNER_WALLET_ADDRESS,
+    OWNER_WALLET_KEY: process.env.OWNER_WALLET_KEY,
+    HOT_WALLET_ADDRESS: process.env.HOT_WALLET_ADDRESS,
+    HOT_WALLET_KEY: process.env.HOT_WALLET_KEY,
+    CHAIN_ID: process.env.CHAIN_ID,
+
+    GAS_LIMIT: 220000,
 
 };
