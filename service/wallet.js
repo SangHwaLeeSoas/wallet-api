@@ -24,6 +24,7 @@ exports.getBalance = async (coin, addr) => {
         switch (coin) {
             case 'ETH' :
                 balance = await web3.eth.getBalance(addr);
+                balance = web3.utils.fromWei(balance.toString(), 'ether').toString();
                 break;
             case 'TOKEN' :
                 balance = await myToken.methods.balanceOf(addr).call()
@@ -67,6 +68,7 @@ exports.transferToken = async (fromAddress, privateKey, toAddress, coin, amount)
     try {
 
         let balance = 0;
+        let to = properties.CONTRACT_ADDRESS;
         let data = null;
         let value = null;
         switch (coin) {
@@ -76,7 +78,8 @@ exports.transferToken = async (fromAddress, privateKey, toAddress, coin, amount)
                 break;
             case 'ETH':
                 balance = await web3.eth.getBalance(fromAddress);
-                value = amount;
+                value = web3.utils.toBN(web3.utils.toWei(amount.toString(), 'ether')).toString();
+                to = toAddress;
                 break;
         }
 
@@ -88,13 +91,13 @@ exports.transferToken = async (fromAddress, privateKey, toAddress, coin, amount)
         let gasLimit = properties.GAS_LIMIT;
         let tx = {
             from: fromAddress,
-            to: properties.CONTRACT_ADDRESS,
+            to: to,
             gasPrice: web3.utils.toHex(gasPrice),
             gas: web3.utils.toHex(gasLimit),
             chainId: properties.CHAIN_ID
         };
         if (data) tx.data = data;
-        if (value) tx.value = data;
+        if (value) tx.value = value;
 
         logger.info(tx);
         const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);

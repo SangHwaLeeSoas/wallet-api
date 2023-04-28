@@ -74,6 +74,9 @@ app.post('/transfer', async (req, res) => {
 });
 
 
+/* TODO : 트랜잭션 조회  => return 상태, 컨펌 수 */
+
+
 /* * 지갑 목록 전체 조회 API */
 // app.get('/get/all/account', async (req, res) => {
 //
