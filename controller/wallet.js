@@ -18,9 +18,10 @@ app.get('/balance', async (req, res) => {
     const coin = req.query.coin || "TOKEN";
     const data = await walletService.getBalance(coin, addr)
 
-    res.json({
-      code: 200,
-      data: data
+    res.status(resCode.SUCCESS.httpCode).json({
+      code : resCode.SUCCESS.code,
+      msg : resCode.SUCCESS.message,
+      data : data
     });
   } catch (e) {
     makeErrorResponse(e, res)
@@ -35,9 +36,10 @@ app.post('/make/account', async (req, res) => {
     logger.info(`/make/account`)
     const data = await walletService.makeWallet()
 
-    res.json({
-      code: 200,
-      data: data
+    res.status(resCode.SUCCESS.httpCode).json({
+      code : resCode.SUCCESS.code,
+      msg : resCode.SUCCESS.message,
+      data : data
     });
   } catch (e) {
     makeErrorResponse(e, res)
@@ -64,9 +66,10 @@ app.post('/transfer', async (req, res) => {
     }
     const data = await walletService.transferToken(fromAddr, fromKey, toAddr, coin, amount);
 
-    res.json({
-      code: 200,
-      data: data
+    res.status(resCode.SUCCESS.httpCode).json({
+      code : resCode.SUCCESS.code,
+      msg : resCode.SUCCESS.message,
+      data : data
     });
   } catch (e) {
     makeErrorResponse(e, res)
@@ -81,9 +84,10 @@ app.get('/transaction', async (req, res) => {
     logger.info(`/transaction => ${req.query.txHash}`)
     const txHash = req.query.txHash || (() => { throw new customError(resCode.BAD_REQUEST, 'empty txHash') })();
     const data = await walletService.getTransactionInfo(txHash);
-    res.json({
-      code: 200,
-      data: data
+    res.status(resCode.SUCCESS.httpCode).json({
+      code : resCode.SUCCESS.code,
+      msg : resCode.SUCCESS.message,
+      data : data
     });
   } catch (e) {
     makeErrorResponse(e, res)
@@ -98,9 +102,10 @@ app.get('/allowed/account', async (req, res) => {
     logger.info(`/allowed/account => ${req.query.addr}`)
     const addr = req.query.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
     const data = await walletService.getIsAllowed(addr);
-    res.json({
-      code: 200,
-      data: data
+    res.status(resCode.SUCCESS.httpCode).json({
+      code : resCode.SUCCESS.code,
+      msg : resCode.SUCCESS.message,
+      data : data
     });
   } catch (e) {
     makeErrorResponse(e, res)
@@ -116,9 +121,10 @@ app.post('/add/allowed/account', async (req, res) => {
     const addr = req.body.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
     const isAllowed = req.body.isAllowed || (() => { throw new customError(resCode.BAD_REQUEST, 'empty isAllowed') })();
     const data = await walletService.manageAllowedAccount(addr, isAllowed);
-    res.json({
-      code: 200,
-      data: data
+    res.status(resCode.SUCCESS.httpCode).json({
+      code : resCode.SUCCESS.code,
+      msg : resCode.SUCCESS.message,
+      data : data
     });
   } catch (e) {
     makeErrorResponse(e, res)
@@ -133,9 +139,10 @@ app.post('/change/owner', async (req, res) => {
     const ownerAddr = req.body.ownerAddr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty ownerAddr') })();
     const ownerKey = req.body.ownerKey || (() => { throw new customError(resCode.BAD_REQUEST, 'empty ownerKey') })();
     const data = await walletService.changeOwner(ownerAddr, ownerKey);
-    res.json({
-      code: 200,
-      data: data
+    res.status(resCode.SUCCESS.httpCode).json({
+      code : resCode.SUCCESS.code,
+      msg : resCode.SUCCESS.message,
+      data : data
     });
   } catch (e) {
     makeErrorResponse(e, res)
