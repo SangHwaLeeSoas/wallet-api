@@ -92,9 +92,35 @@ app.get('/transaction', async (req, res) => {
 
 
 /* 외부 전송 허용 목록 API */
+app.get('/allowed/account/list', async (req, res) => {
+
+  try {
+    logger.info(`/allowed/account/list`)
+    const data = await walletService.getTransactionInfo(txHash);
+    res.json({
+      code: 200,
+      data: data
+    });
+  } catch (e) {
+    makeErrorResponse(e, res)
+  }
+});
 
 
 /* 외부 전송 허용 관리 API */
+app.get('/allowed/account/list', async (req, res) => {
+
+  try {
+    logger.info(`/allowed/account/list`)
+    const data = await walletService.getTransactionInfo(txHash);
+    res.json({
+      code: 200,
+      data: data
+    });
+  } catch (e) {
+    makeErrorResponse(e, res)
+  }
+});
 
 
 /* 오너 계정 변경 API */

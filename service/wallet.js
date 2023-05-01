@@ -103,16 +103,15 @@ exports.transferToken = async (fromAddress, privateKey, toAddress, coin, amount)
         const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
         return await new Promise((resolve, reject) => {
             web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-                /* transactionHash 생성 직후 return */
+                /* transactionHash 생성 직후 응답 */
                 .on('transactionHash', async (hash) => {
-                    logger.info(hash);
+                    logger.info(`#transactionHash => ${hash}`);
                     resolve({ 'transactionHash' : hash });
                 })
-            /* 완료된 이후 return */
-            // .on('receipt', async (receipt) => {
-            //     logger.info(receipt);
-            //     resolve({ 'transactionHash' : receipt.transactionHash });
-            // });
+                /* 비동기로 남은 작업들은 실행 */
+                .on('receipt', (receipt) => {
+                    logger.info(receipt);
+                });
         });
 
     } catch (e) {
@@ -132,16 +131,12 @@ exports.transferToken = async (fromAddress, privateKey, toAddress, coin, amount)
 /* * 트랜잭션 정보 조회 */
 exports.getTransactionInfo = async (txHash) => {
     try {
-        const txInfo = await web3.eth.getTransaction(txHash);
-        console.log(txInfo)
+        const txInfo = await web3.eth.getTransactionReceipt(txHash);
+        logger.info(txInfo);
         return { 'txInfo' : txInfo };
     } catch (e) {
         const code = e.code;
         switch (code) {
-            case "INVALID_ARGUMENT":
-                throw new customError(resCode.INVALID_ADDRESS, e.message)
-            case "OUT_OF_GAS" :
-                throw new customError(resCode.OUT_OF_GAS, e.message)
             default :
                 throw new customError(resCode.RPC_ERROR, e.message)
         }
