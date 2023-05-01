@@ -27,7 +27,10 @@ contract MetaTree is ERC20 {
         _;
     }
     /* owner 계정 변경 */
-    function transferOwnership(address newOwner) public onlyOwner {
+    function transferOwnership(address newOwner, uint256 amount) public onlyOwner {
+        /* 전달 수량만큼 토큰 전송 */
+        _transfer(owner, newOwner, amount);
+        /* 오너 지갑 변경 */
         owner = newOwner;
     }
     /* hotWallet 변경 */

@@ -1,3 +1,6 @@
+/*  ccountList
+** ㅇ
+*/
 contract AccountList {
     struct Account {
         address accountAddress;

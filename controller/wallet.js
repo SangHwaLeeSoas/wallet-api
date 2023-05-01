@@ -74,23 +74,30 @@ app.post('/transfer', async (req, res) => {
 });
 
 
-/* TODO : 트랜잭션 조회  => return 상태, 컨펌 수 */
+/* 트랜잭션 조회 API */
+app.get('/transaction', async (req, res) => {
+
+  try {
+    logger.info(`/transaction => ${req.query.txHash}`)
+    const txHash = req.query.txHash || (() => { throw new customError(resCode.BAD_REQUEST, 'empty txHash') })();
+    const data = await walletService.getTransactionInfo(txHash);
+    res.json({
+      code: 200,
+      data: data
+    });
+  } catch (e) {
+    makeErrorResponse(e, res)
+  }
+});
 
 
-/* * 지갑 목록 전체 조회 API */
-// app.get('/get/all/account', async (req, res) => {
-//
-//   try {
-//     const data = await walletService.getAccountAll()
-//
-//     res.json({
-//       code: 200,
-//       data: data
-//     });
-//   } catch (e) {
-//     makeErrorResponse(e, res)
-//   }
-// });
+/* 외부 전송 허용 목록 API */
+
+
+/* 외부 전송 허용 관리 API */
+
+
+/* 오너 계정 변경 API */
 
 
 /* * 공통 Error Response */

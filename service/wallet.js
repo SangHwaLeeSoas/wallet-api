@@ -101,9 +101,19 @@ exports.transferToken = async (fromAddress, privateKey, toAddress, coin, amount)
 
         logger.info(tx);
         const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
-        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-        logger.info(receipt);
-        return { 'transactionHash' : receipt.transactionHash };
+        return await new Promise((resolve, reject) => {
+            web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+                /* transactionHash 생성 직후 return */
+                .on('transactionHash', async (hash) => {
+                    logger.info(hash);
+                    resolve({ 'transactionHash' : hash });
+                })
+            /* 완료된 이후 return */
+            // .on('receipt', async (receipt) => {
+            //     logger.info(receipt);
+            //     resolve({ 'transactionHash' : receipt.transactionHash });
+            // });
+        });
 
     } catch (e) {
         const code = e.code;
@@ -119,23 +129,23 @@ exports.transferToken = async (fromAddress, privateKey, toAddress, coin, amount)
 }
 
 
-/* * 지갑 목록 조회 */
-// exports.getAccountAll = async () => {
-//     try {
-//         const account = await web3.eth.getAccounts()
-//         console.log(account)
-//         return { 'accountList' : account };
-//     } catch (e) {
-//         const code = e.code;
-//         switch (code) {
-//             case "INVALID_ARGUMENT":
-//                 throw new customError(resCode.INVALID_ADDRESS, e.message)
-//             case "OUT_OF_GAS" :
-//                 throw new customError(resCode.OUT_OF_GAS, e.message)
-//             default :
-//                 throw new customError(resCode.RPC_ERROR, e.message)
-//         }
-//     }
-// }
+/* * 트랜잭션 정보 조회 */
+exports.getTransactionInfo = async (txHash) => {
+    try {
+        const txInfo = await web3.eth.getTransaction(txHash);
+        console.log(txInfo)
+        return { 'txInfo' : txInfo };
+    } catch (e) {
+        const code = e.code;
+        switch (code) {
+            case "INVALID_ARGUMENT":
+                throw new customError(resCode.INVALID_ADDRESS, e.message)
+            case "OUT_OF_GAS" :
+                throw new customError(resCode.OUT_OF_GAS, e.message)
+            default :
+                throw new customError(resCode.RPC_ERROR, e.message)
+        }
+    }
+}
 
 
