@@ -91,12 +91,13 @@ app.get('/transaction', async (req, res) => {
 });
 
 
-/* 외부 전송 허용 목록 API */
-app.get('/allowed/account/list', async (req, res) => {
+/* 계정 전송 상태 조회 API */
+app.get('/allowed/account', async (req, res) => {
 
   try {
-    logger.info(`/allowed/account/list`)
-    const data = await walletService.getTransactionInfo(txHash);
+    logger.info(`/allowed/account => ${req.query.addr}`)
+    const addr = req.query.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
+    const data = await walletService.getIsAllowed(addr);
     res.json({
       code: 200,
       data: data
@@ -107,12 +108,14 @@ app.get('/allowed/account/list', async (req, res) => {
 });
 
 
-/* 외부 전송 허용 관리 API */
-app.get('/allowed/account/list', async (req, res) => {
+/* 전송 허용 추가 API */
+app.post('/add/allowed/account', async (req, res) => {
 
   try {
-    logger.info(`/allowed/account/list`)
-    const data = await walletService.getTransactionInfo(txHash);
+    logger.info(`/set/allowed/account => ${req.body.addr} ${req.body.isAllowed}`)
+    const addr = req.body.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
+    const isAllowed = req.body.isAllowed || (() => { throw new customError(resCode.BAD_REQUEST, 'empty isAllowed') })();
+    const data = await walletService.manageAllowedAccount(addr, isAllowed);
     res.json({
       code: 200,
       data: data

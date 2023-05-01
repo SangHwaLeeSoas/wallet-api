@@ -11,6 +11,7 @@ const logger = require('../config/log4').getLogger('walletController')
 const rpcUrl = properties.RPC_PROTOCOL + properties.PROTOCOL_SEPARATE + properties.RPC_URL
 const provider = new Web3.providers.HttpProvider(rpcUrl);
 const web3 = new Web3(provider);
+web3.eth.defaultAccount = properties.OWNER_WALLET_ADDRESS;
 
 /* * Smart Contract 세팅 */
 const rawAbi = fs.readFileSync(properties.ABI_PATH);
@@ -87,15 +88,7 @@ exports.transferToken = async (fromAddress, privateKey, toAddress, coin, amount)
         if (balance < amount)
             throw new customError(resCode.OUT_OF_AMOUNT)
 
-        let gasPrice = await web3.eth.getGasPrice();
-        let gasLimit = properties.GAS_LIMIT;
-        let tx = {
-            from: fromAddress,
-            to: to,
-            gasPrice: web3.utils.toHex(gasPrice),
-            gas: web3.utils.toHex(gasLimit),
-            chainId: properties.CHAIN_ID
-        };
+        const tx = await makeTransactionParma(fromAddress, to);
         if (data) tx.data = data;
         if (value) tx.value = value;
 
@@ -111,6 +104,10 @@ exports.transferToken = async (fromAddress, privateKey, toAddress, coin, amount)
                 /* 비동기로 남은 작업들은 실행 */
                 .on('receipt', (receipt) => {
                     logger.info(receipt);
+                })
+                .on('error', (error) => {
+                    logger.error(error);
+                    reject(error);
                 });
         });
 
@@ -144,3 +141,84 @@ exports.getTransactionInfo = async (txHash) => {
 }
 
 
+/* * 전송 허용 관리 */
+exports.manageAllowedAccount = async (addr, isAllowed) => {
+    try {
+
+        let data;
+
+        /* 허용 처리 */
+        if (isAllowed) {
+            data = myToken.methods.allowTransfer(addr).encodeABI();
+        /* 비허용 처리 */
+        } else {
+            data =  myToken.methods.disallowTransfer(addr).encodeABI();
+        }
+
+        /* TODO : HOT_WALLET으로 변경 */
+        const tx = await makeTransactionParma(properties.OWNER_WALLET_ADDRESS, properties.CONTRACT_ADDRESS);
+        tx.data = data;
+        const signedTx = await web3.eth.accounts.signTransaction(tx, properties.OWNER_WALLET_KEY);  /* TODO : HOT_WALLET으로 변경 */
+        return await new Promise((resolve, reject) => {
+            web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+                /* transactionHash 생성 직후 응답 */
+                // .on('transactionHash', async (hash) => {
+                //     logger.info(`#transactionHash => ${hash}`);
+                //     resolve({ 'transactionHash' : hash });
+                // })
+                /* 비동기로 남은 작업들은 실행 */
+                .on('receipt', async (receipt) => {
+                    logger.info(receipt);
+                    resolve({'transactionHash' : receipt.transactionHash});
+                })
+                .on('error', (error) => {
+                    logger.error(error);
+                    reject(error);
+                });
+        });
+    } catch (e) {
+        const code = e.code;
+        switch (code) {
+            case "INVALID_ARGUMENT":
+                throw new customError(resCode.INVALID_ADDRESS, e.message)
+            case "OUT_OF_GAS" :
+                throw new customError(resCode.OUT_OF_GAS, e.message)
+            default :
+                throw new customError(resCode.RPC_ERROR, e.message)
+        }
+    }
+}
+
+
+/* * 전송 허용 상태 조회 */
+exports.getIsAllowed = async (addr) => {
+    try {
+        const isAllowed = await myToken.methods.isTransferAllowed(addr).call();
+        logger.info(`#isAllowed => ${isAllowed} ${addr}`);
+        return { 'isAllowed' : isAllowed };
+    } catch (e) {
+        console.log(e);
+        const code = e.code;
+        switch (code) {
+            case "INVALID_ARGUMENT":
+                throw new customError(resCode.INVALID_ADDRESS, e.message)
+            default :
+                throw new customError(resCode.RPC_ERROR, e.message)
+        }
+    }
+}
+
+
+/* 트랜잭션 파라미터 생성 */
+makeTransactionParma = async (from, to) => {
+    let gasPrice = await web3.eth.getGasPrice();
+    let gasLimit = properties.GAS_LIMIT;
+    let tx = {
+        from: from,
+        to: to,
+        gasPrice: web3.utils.toHex(gasPrice),
+        gas: web3.utils.toHex(gasLimit),
+        chainId: properties.CHAIN_ID
+    };
+    return tx;
+}

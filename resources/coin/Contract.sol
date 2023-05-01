@@ -45,6 +45,10 @@ contract MetaTree is ERC20 {
     function disallowTransfer(address user) public onlyOwner {
         transferAllowed[user] = false;
     }
+    /* transferAllowed 허용 유무 조회 */
+    function isTransferAllowed(address user) public view onlyOwner returns (bool) {
+        return transferAllowed[user];
+    }
     /* 전송 */
     function transfer(address recipient, uint256 amount) public virtual override onlyAllowed(msg.sender) returns (bool) {
         _transfer(_msgSender(), recipient, amount);
@@ -54,27 +58,27 @@ contract MetaTree is ERC20 {
 
 
     /*  AccountList */
-    struct Account {
-        address accountAddress;
-        bytes32 privateKey;
-    }
-
-    Account[] public accounts;
-
-    function addAccount(address _accountAddress, bytes32 _privateKey) public {
-        Account memory newAccount = Account(_accountAddress, _privateKey);
-        accounts.push(newAccount);
-    }
-
-    function getAccount(uint256 _index) public view returns (address, bytes32) {
-        require(_index < accounts.length, "Index out of bounds");
-        Account memory account = accounts[_index];
-        return (account.accountAddress, account.privateKey);
-    }
-
-    function getAccounts() public view returns (Account[] memory) {
-        return accounts;
-    }
+//    struct Account {
+//        address accountAddress;
+//        bytes32 privateKey;
+//    }
+//
+//    Account[] public accounts;
+//
+//    function addAccount(address _accountAddress, bytes32 _privateKey) public {
+//        Account memory newAccount = Account(_accountAddress, _privateKey);
+//        accounts.push(newAccount);
+//    }
+//
+//    function getAccount(uint256 _index) public view returns (address, bytes32) {
+//        require(_index < accounts.length, "Index out of bounds");
+//        Account memory account = accounts[_index];
+//        return (account.accountAddress, account.privateKey);
+//    }
+//
+//    function getAccounts() public view returns (Account[] memory) {
+//        return accounts;
+//    }
     /*  _AccountList */
 
 
