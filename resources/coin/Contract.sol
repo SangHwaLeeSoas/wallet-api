@@ -18,7 +18,7 @@ contract MetaTree is ERC20 {
     }
     /* 함수를 호출한 계정이 owner 계정과 일치해야만 실행 */
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can call this function.");
+        require(msg.sender == owner || msg.sender == hotWallet, "Only owner or hotWallet can call this function.");
         _;
     }
     /* 호출한 주소가 transferAllowed 등록된 주소거나 owner/hotWallet 주소와 일치해야만 실행 */

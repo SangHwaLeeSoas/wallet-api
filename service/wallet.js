@@ -209,6 +209,42 @@ exports.getIsAllowed = async (addr) => {
 }
 
 
+/* * 전송 허용 관리 */
+exports.changeOwner = async (ownerAddr, ownerKey) => {
+    try {
+        const ownerTokenBalance = await myToken.methods.balanceOf(properties.OWNER_WALLET_ADDRESS).call();
+        let data = myToken.methods.transferOwnership(ownerAddr, ownerTokenBalance).encodeABI();
+        const tx = await makeTransactionParma(properties.OWNER_WALLET_ADDRESS, properties.CONTRACT_ADDRESS);
+        tx.data = data;
+        const signedTx = await web3.eth.accounts.signTransaction(tx, properties.OWNER_WALLET_KEY);
+        return await new Promise((resolve, reject) => {
+            web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+                /* 비동기 실행 */
+                .on('receipt', async (receipt) => {
+                    logger.info(receipt);
+                    properties.OWNER_WALLET_ADDRESS = ownerAddr;
+                    properties.OWNER_WALLET_KEY = ownerKey;
+                    resolve({'transactionHash' : receipt.transactionHash});
+                })
+                .on('error', (error) => {
+                    logger.error(error);
+                    reject(error);
+                });
+        });
+    } catch (e) {
+        const code = e.code;
+        switch (code) {
+            case "INVALID_ARGUMENT":
+                throw new customError(resCode.INVALID_ADDRESS, e.message)
+            case "OUT_OF_GAS" :
+                throw new customError(resCode.OUT_OF_GAS, e.message)
+            default :
+                throw new customError(resCode.RPC_ERROR, e.message)
+        }
+    }
+}
+
+
 /* 트랜잭션 파라미터 생성 */
 makeTransactionParma = async (from, to) => {
     let gasPrice = await web3.eth.getGasPrice();

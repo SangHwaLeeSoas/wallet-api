@@ -127,7 +127,20 @@ app.post('/add/allowed/account', async (req, res) => {
 
 
 /* 오너 계정 변경 API */
-
+app.post('/change/owner', async (req, res) => {
+  try {
+    logger.info(`/change/owner => ${req.body.ownerAddr} ${req.body.ownerKey}`)
+    const ownerAddr = req.body.ownerAddr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty ownerAddr') })();
+    const ownerKey = req.body.ownerKey || (() => { throw new customError(resCode.BAD_REQUEST, 'empty ownerKey') })();
+    const data = await walletService.changeOwner(ownerAddr, ownerKey);
+    res.json({
+      code: 200,
+      data: data
+    });
+  } catch (e) {
+    makeErrorResponse(e, res)
+  }
+});
 
 /* * 공통 Error Response */
 function makeErrorResponse (e, res) {
