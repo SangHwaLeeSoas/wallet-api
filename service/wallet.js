@@ -162,14 +162,13 @@ exports.manageAllowedAccount = async (addr, isAllowed) => {
         return await new Promise((resolve, reject) => {
             web3.eth.sendSignedTransaction(signedTx.rawTransaction)
                 /* transactionHash 생성 직후 응답 */
-                // .on('transactionHash', async (hash) => {
-                //     logger.info(`#transactionHash => ${hash}`);
-                //     resolve({ 'transactionHash' : hash });
-                // })
+                .on('transactionHash', async (hash) => {
+                    logger.info(`#transactionHash => ${hash}`);
+                    resolve({ 'transactionHash' : hash });
+                })
                 /* 비동기로 남은 작업들은 실행 */
                 .on('receipt', async (receipt) => {
                     logger.info(receipt);
-                    resolve({'transactionHash' : receipt.transactionHash});
                 })
                 .on('error', (error) => {
                     logger.error(error);
@@ -219,12 +218,16 @@ exports.changeOwner = async (ownerAddr, ownerKey) => {
         const signedTx = await web3.eth.accounts.signTransaction(tx, properties.OWNER_WALLET_KEY);
         return await new Promise((resolve, reject) => {
             web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-                /* 비동기 실행 */
-                .on('receipt', async (receipt) => {
+                /* transactionHash 생성 직후 응답 */
+                .on('transactionHash', async (hash) => {
+                    logger.info(`#transactionHash => ${hash}`);
+                    resolve({ 'transactionHash' : hash });
+                })
+                /* 비동기로 남은 작업들은 실행 */
+                .on('receipt', (receipt) => {
                     logger.info(receipt);
                     properties.OWNER_WALLET_ADDRESS = ownerAddr;
                     properties.OWNER_WALLET_KEY = ownerKey;
-                    resolve({'transactionHash' : receipt.transactionHash});
                 })
                 .on('error', (error) => {
                     logger.error(error);
