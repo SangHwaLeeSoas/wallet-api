@@ -17,12 +17,7 @@ app.get('/balance', async (req, res) => {
     const addr = req.query.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
     const coin = req.query.coin || "TOKEN";
     const data = await walletService.getBalance(coin, addr)
-
-    res.status(resCode.SUCCESS.httpCode).json({
-      code : resCode.SUCCESS.code,
-      msg : resCode.SUCCESS.message,
-      data : data
-    });
+    sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
   }
@@ -35,12 +30,7 @@ app.post('/make/account', async (req, res) => {
   try {
     logger.info(`/make/account`)
     const data = await walletService.makeWallet()
-
-    res.status(resCode.SUCCESS.httpCode).json({
-      code : resCode.SUCCESS.code,
-      msg : resCode.SUCCESS.message,
-      data : data
-    });
+    sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
   }
@@ -65,12 +55,7 @@ app.post('/transfer', async (req, res) => {
       fromKey || (() => { throw new customError(resCode.BAD_REQUEST, 'empty fromKey') })();
     }
     const data = await walletService.transferToken(fromAddr, fromKey, toAddr, coin, amount);
-
-    res.status(resCode.SUCCESS.httpCode).json({
-      code : resCode.SUCCESS.code,
-      msg : resCode.SUCCESS.message,
-      data : data
-    });
+    sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
   }
@@ -84,11 +69,7 @@ app.get('/transaction', async (req, res) => {
     logger.info(`/transaction => ${req.query.txHash}`)
     const txHash = req.query.txHash || (() => { throw new customError(resCode.BAD_REQUEST, 'empty txHash') })();
     const data = await walletService.getTransactionInfo(txHash);
-    res.status(resCode.SUCCESS.httpCode).json({
-      code : resCode.SUCCESS.code,
-      msg : resCode.SUCCESS.message,
-      data : data
-    });
+    sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
   }
@@ -102,11 +83,7 @@ app.get('/allowed/account', async (req, res) => {
     logger.info(`/allowed/account => ${req.query.addr}`)
     const addr = req.query.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
     const data = await walletService.getIsAllowed(addr);
-    res.status(resCode.SUCCESS.httpCode).json({
-      code : resCode.SUCCESS.code,
-      msg : resCode.SUCCESS.message,
-      data : data
-    });
+    sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
   }
@@ -121,11 +98,7 @@ app.post('/add/allowed/account', async (req, res) => {
     const addr = req.body.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
     const isAllowed = req.body.isAllowed || (() => { throw new customError(resCode.BAD_REQUEST, 'empty isAllowed') })();
     const data = await walletService.manageAllowedAccount(addr, isAllowed);
-    res.status(resCode.SUCCESS.httpCode).json({
-      code : resCode.SUCCESS.code,
-      msg : resCode.SUCCESS.message,
-      data : data
-    });
+    sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
   }
@@ -139,32 +112,35 @@ app.post('/change/owner', async (req, res) => {
     const ownerAddr = req.body.ownerAddr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty ownerAddr') })();
     const ownerKey = req.body.ownerKey || (() => { throw new customError(resCode.BAD_REQUEST, 'empty ownerKey') })();
     const data = await walletService.changeOwner(ownerAddr, ownerKey);
-    res.status(resCode.SUCCESS.httpCode).json({
-      code : resCode.SUCCESS.code,
-      msg : resCode.SUCCESS.message,
-      data : data
-    });
+    sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
   }
 });
 
 /* * 공통 Error Response */
-function makeErrorResponse (e, res) {
+const makeErrorResponse = (e, res) => {
   if (e instanceof customError) {
     logger.info(e)
-    res.status(e.httpStatusCode).json({
-      code : e.code,
-      msg : e.message
-    })
+    sendResponse(e, res);
   } else {
     logger.error(e)
     const customRes = resCode.create(resCode.SERVER_ERROR)
-    res.status(customRes.httpCode).json({
-      code : customRes.code,
-      msg : e.message
-    })
+    sendResponse(customRes, res);
   }
+}
+
+/* * response 응답 */
+const sendResponse = (resCode, res, data) => {
+  let httpStatus = 200;
+  /* RPC 에러일 경우 Network Response code를 200이 아닌, 다른 코드로 변경*/
+  if (resCode.code = 'RPC_ERROR')
+    httpStatus = resCode.httpCode;
+  res.status(httpStatus).json({
+    status : resCode.code,
+    message : resCode.message,
+    data : data
+  });
 }
 
 module.exports = app;
