@@ -2,7 +2,7 @@ class CustomError extends Error {
     constructor(resCode, message) {
         super();
         this.code = resCode.code;
-        this.httpStatusCode = resCode.httpCode;
+        this.httpCode = resCode.httpCode;
         this.message = message || resCode.message
     }
     // constructor(code =200, httpStatusCode = 200, message) {

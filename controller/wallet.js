@@ -133,10 +133,10 @@ const sendResponse = (resCode, res, data) => {
   let httpStatus = 200;
   /* RPC 에러일 경우 Network Response code를 200이 아닌, 다른 코드로 변경*/
   if (resCode.code == 'RPC_ERROR')
-    httpStatus = resCode.httpStatusCode;
+    httpStatus = resCode.httpCode;
 
   res.status(httpStatus).json({
-    status : resCode.code,
+    status : resCode.httpCode,
     message : resCode.message,
     data : data
   });
