@@ -12,10 +12,10 @@ const walletService = require('../service/wallet')
 app.get('/balance', async (req, res) => {
 
   try {
-    logger.info(`/get/balance => ${req.query.coin} ${req.query.address}`)
+    logger.info(`/get/balance => ${req.query.symbol} ${req.query.address}`)
     const address = req.query.address || (() => { throw new customError(resCode.BAD_REQUEST, 'empty address') })();
-    const coin = req.query.coin || "TOKEN";
-    const data = await walletService.getBalance(coin, address)
+    const symbol = req.query.symbol || "TOKEN";
+    const data = await walletService.getBalance(symbol, address)
     sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
@@ -40,8 +40,8 @@ app.post('/make/account', async (req, res) => {
 app.post('/transfer', async (req, res) => {
 
   try {
-    logger.info(`/transfer => ${req.body.coin} ${req.body.amount} ${req.body.fromAddress} ${req.body.fromKey} ${req.body.toAddress}`)
-    const coin = req.body.coin || "TOKEN";
+    logger.info(`/transfer => ${req.body.symbol} ${req.body.amount} ${req.body.fromAddress} ${req.body.fromKey} ${req.body.toAddress}`)
+    const symbol = req.body.symbol || "TOKEN";
     const amount = req.body.amount || (() => { throw new customError(resCode.BAD_REQUEST, 'empty amount') })();
     const toAddress = req.body.toAddress || (() => { throw new customError(resCode.BAD_REQUEST, 'empty toAddress') })();
     let fromAddress = req.body.fromAddress;
@@ -53,7 +53,7 @@ app.post('/transfer', async (req, res) => {
     } else {
       fromKey || (() => { throw new customError(resCode.BAD_REQUEST, 'empty fromKey') })();
     }
-    const data = await walletService.transferToken(fromAddress, fromKey, toAddress, coin, amount);
+    const data = await walletService.transferToken(fromAddress, fromKey, toAddress, symbol, amount);
     sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
