@@ -119,11 +119,10 @@ app.post('/change/owner', async (req, res) => {
 
 /* * 공통 Error Response */
 const makeErrorResponse = (e, res) => {
+  logger.info(e);
   if (e instanceof customError) {
-    logger.info(e)
     sendResponse(e, res);
   } else {
-    logger.error(e)
     const customRes = resCode.create(resCode.SERVER_ERROR)
     sendResponse(customRes, res);
   }
@@ -134,7 +133,8 @@ const sendResponse = (resCode, res, data) => {
   let httpStatus = 200;
   /* RPC 에러일 경우 Network Response code를 200이 아닌, 다른 코드로 변경*/
   if (resCode.code == 'RPC_ERROR')
-    httpStatus = resCode.httpCode;
+    httpStatus = resCode.httpStatusCode;
+
   res.status(httpStatus).json({
     status : resCode.code,
     message : resCode.message,

@@ -103,7 +103,7 @@ exports.transferToken = async (fromAddress, privateKey, toAddress, coin, amount)
                 })
                 /* 비동기로 남은 작업들은 실행 */
                 .on('receipt', (receipt) => {
-                    logger.info(receipt);
+                        logger.info(receipt);
                 })
                 .on('error', (error) => {
                     logger.error(error);
