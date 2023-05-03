@@ -24,8 +24,9 @@ app.use('/wallet', walletController);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  res.status(404).json({
-    error: 'Not found'
+  res.status(200).json({
+    status: 404,
+    message: 'page not found'
   });
 });
 
