@@ -19,16 +19,16 @@ const tokenAbi = JSON.parse(rawAbi.toString());
 const myToken = new web3.eth.Contract(tokenAbi, properties.CONTRACT_ADDRESS);
 
 /* * 잔액 조회 */
-exports.getBalance = async (coin, addr) => {
+exports.getBalance = async (coin, address) => {
     try {
         let balance;
         switch (coin) {
             case 'ETH' :
-                balance = await web3.eth.getBalance(addr);
+                balance = await web3.eth.getBalance(address);
                 balance = web3.utils.fromWei(balance.toString(), 'ether').toString();
                 break;
             case 'TOKEN' :
-                balance = await myToken.methods.balanceOf(addr).call()
+                balance = await myToken.methods.balanceOf(address).call()
                 break;
         }
         return { 'balance' : balance };

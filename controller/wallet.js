@@ -8,15 +8,14 @@ const walletService = require('../service/wallet')
 
 
 
-/* * 잔액 조회 API
-*  @Param : coin (ETH, TOKEN) addr (주소) */
+/* * 잔액 조회 API  */
 app.get('/balance', async (req, res) => {
 
   try {
-    logger.info(`/get/balance => ${req.query.coin} ${req.query.addr}`)
-    const addr = req.query.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
+    logger.info(`/get/balance => ${req.query.coin} ${req.query.address}`)
+    const address = req.query.address || (() => { throw new customError(resCode.BAD_REQUEST, 'empty address') })();
     const coin = req.query.coin || "TOKEN";
-    const data = await walletService.getBalance(coin, addr)
+    const data = await walletService.getBalance(coin, address)
     sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
@@ -41,20 +40,20 @@ app.post('/make/account', async (req, res) => {
 app.post('/transfer', async (req, res) => {
 
   try {
-    logger.info(`/transfer => ${req.body.coin} ${req.body.amount} ${req.body.fromAddr} ${req.body.fromKey} ${req.body.toAddr}`)
+    logger.info(`/transfer => ${req.body.coin} ${req.body.amount} ${req.body.fromAddress} ${req.body.fromKey} ${req.body.toAddress}`)
     const coin = req.body.coin || "TOKEN";
     const amount = req.body.amount || (() => { throw new customError(resCode.BAD_REQUEST, 'empty amount') })();
-    const toAddr = req.body.toAddr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty toAddr') })();
-    let fromAddr = req.body.fromAddr;
+    const toAddress = req.body.toAddress || (() => { throw new customError(resCode.BAD_REQUEST, 'empty toAddress') })();
+    let fromAddress = req.body.fromAddress;
     let fromKey = req.body.fromKey;
     /* 기본값 Hot wallet에서 출금 */
-    if (!fromAddr) {
-      fromAddr = properties.HOT_WALLET_ADDRESS;
+    if (!fromAddress) {
+      fromAddress = properties.HOT_WALLET_ADDRESS;
       fromKey = properties.HOT_WALLET_KEY
     } else {
       fromKey || (() => { throw new customError(resCode.BAD_REQUEST, 'empty fromKey') })();
     }
-    const data = await walletService.transferToken(fromAddr, fromKey, toAddr, coin, amount);
+    const data = await walletService.transferToken(fromAddress, fromKey, toAddress, coin, amount);
     sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
@@ -80,9 +79,9 @@ app.get('/transaction', async (req, res) => {
 app.get('/allowed/account', async (req, res) => {
 
   try {
-    logger.info(`/allowed/account => ${req.query.addr}`)
-    const addr = req.query.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
-    const data = await walletService.getIsAllowed(addr);
+    logger.info(`/allowed/account => ${req.query.address}`)
+    const address = req.query.address || (() => { throw new customError(resCode.BAD_REQUEST, 'empty address') })();
+    const data = await walletService.getIsAllowed(address);
     sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
@@ -94,10 +93,10 @@ app.get('/allowed/account', async (req, res) => {
 app.post('/add/allowed/account', async (req, res) => {
 
   try {
-    logger.info(`/set/allowed/account => ${req.body.addr} ${req.body.isAllowed}`)
-    const addr = req.body.addr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty addr') })();
+    logger.info(`/set/allowed/account => ${req.body.address} ${req.body.isAllowed}`)
+    const address = req.body.address || (() => { throw new customError(resCode.BAD_REQUEST, 'empty address') })();
     const isAllowed = req.body.isAllowed || (() => { throw new customError(resCode.BAD_REQUEST, 'empty isAllowed') })();
-    const data = await walletService.manageAllowedAccount(addr, isAllowed);
+    const data = await walletService.manageAllowedAccount(address, isAllowed);
     sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
@@ -108,10 +107,10 @@ app.post('/add/allowed/account', async (req, res) => {
 /* 오너 계정 변경 API */
 app.post('/change/owner', async (req, res) => {
   try {
-    logger.info(`/change/owner => ${req.body.ownerAddr} ${req.body.ownerKey}`)
-    const ownerAddr = req.body.ownerAddr || (() => { throw new customError(resCode.BAD_REQUEST, 'empty ownerAddr') })();
+    logger.info(`/change/owner => ${req.body.ownerAddress} ${req.body.ownerKey}`)
+    const ownerAddress = req.body.ownerAddress || (() => { throw new customError(resCode.BAD_REQUEST, 'empty ownerAddress') })();
     const ownerKey = req.body.ownerKey || (() => { throw new customError(resCode.BAD_REQUEST, 'empty ownerKey') })();
-    const data = await walletService.changeOwner(ownerAddr, ownerKey);
+    const data = await walletService.changeOwner(ownerAddress, ownerKey);
     sendResponse(resCode.SUCCESS, res, data);
   } catch (e) {
     makeErrorResponse(e, res)
